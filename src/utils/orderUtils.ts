@@ -8,6 +8,8 @@ const LOCATION_MULTIPLIERS: Record<string, number> = {
   urban: 1.0
 };
 
+//function to calculate discount based on restaurant location and time
+
 export const calculateDiscount = (
   restaurant: Restaurant,
   isPeakHour: boolean
