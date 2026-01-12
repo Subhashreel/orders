@@ -14,7 +14,7 @@ app.use(express.json());
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
-    info: { title: 'FoodHub API', version: '1.0.0' },
+    info: { title: 'Order Management API', version: '1.0.0' },
     servers: [{ url: 'http://localhost:5000' }]
   },
   apis: ['./src/routes/*.ts']

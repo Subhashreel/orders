@@ -8,11 +8,10 @@ const LOCATION_MULTIPLIERS: Record<string, number> = {
   urban: 1.0
 };
 
-//function to calculate discount based on restaurant location and time
+//function to calculate discount based on restaurant location (peak hour removed for fixed pricing)
 
 export const calculateDiscount = (
-  restaurant: Restaurant,
-  isPeakHour: boolean
+  restaurant: Restaurant
 ): number => {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -24,10 +23,6 @@ export const calculateDiscount = (
   
   const locationMultiplier = LOCATION_MULTIPLIERS[restaurant.location_type] || 1.0;
   discount *= locationMultiplier;
-  
-  if (isPeakHour) {
-    discount *= 0.7;
-  }
   
   return Math.min(discount, 50);
 };

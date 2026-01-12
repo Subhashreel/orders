@@ -1,5 +1,5 @@
 import express from 'express';
-import { createMenuItem, getMenuByRestaurant } from '../controllers/menuController';
+import { createMenuItem, getMenuByRestaurant, updateMenuItem, deleteMenuItem } from '../controllers/menuController';
 
 const router = express.Router();
 
@@ -55,5 +55,56 @@ router.post('/', createMenuItem);
  *         description: Menu items list
  */
 router.get('/restaurant/:restaurantId', getMenuByRestaurant);
+
+/**
+ * @swagger
+ * /api/menu/{itemId}:
+ *   put:
+ *     summary: Update a menu item
+ *     tags: [Menu]
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               base_price:
+ *                 type: number
+ *               preparation_complexity:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Menu item updated
+ */
+router.put('/:itemId', updateMenuItem);
+
+/**
+ * @swagger
+ * /api/menu/{itemId}:
+ *   delete:
+ *     summary: Delete a menu item
+ *     tags: [Menu]
+ *     parameters:
+ *       - in: path
+ *         name: itemId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Menu item deleted
+ */
+router.delete('/:itemId', deleteMenuItem);
 
 export default router;

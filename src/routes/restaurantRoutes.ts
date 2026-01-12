@@ -2,7 +2,9 @@ import express from 'express';
 import { 
   createRestaurant, 
   getAllRestaurants, 
-  getRestaurantById 
+  getRestaurantById,
+  updateRestaurant,
+  deleteRestaurant
 } from '../controllers/restaurantController';
 
 const router = express.Router();
@@ -77,5 +79,60 @@ router.get('/', getAllRestaurants);
  *         description: Restaurant details
  */
 router.get('/:id', getRestaurantById);
+
+/**
+ * @swagger
+ * /api/restaurants/{id}:
+ *   put:
+ *     summary: Update a restaurant
+ *     tags: [Restaurants]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               location_type:
+ *                 type: string
+ *               base_weekday_discount:
+ *                 type: number
+ *               base_weekend_discount:
+ *                 type: number
+ *               base_preparation_time:
+ *                 type: integer
+ *               peak_hour_threshold:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Restaurant updated
+ */
+router.put('/:id', updateRestaurant);
+
+/**
+ * @swagger
+ * /api/restaurants/{id}:
+ *   delete:
+ *     summary: Delete a restaurant
+ *     tags: [Restaurants]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Restaurant deleted
+ */
+router.delete('/:id', deleteRestaurant);
 
 export default router;

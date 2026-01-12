@@ -73,7 +73,7 @@ export const createOrder = async (req: Request, res: Response) => {
     
     const isPeakHour = hourlyOrders[0].count >= restaurant.peak_hour_threshold;
     
-    const discountPercentage = calculateDiscount(restaurant, isPeakHour);
+    const discountPercentage = calculateDiscount(restaurant);
     const discountAmount = (subtotal * discountPercentage) / 100;
     const totalAmount = subtotal - discountAmount;
     

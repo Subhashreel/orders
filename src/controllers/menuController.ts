@@ -37,3 +37,62 @@ export const getMenuByRestaurant = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch menu items' });
   }
 };
+
+export const updateMenuItem = async (req: Request, res: Response) => {
+  try {
+    const { itemId } = req.params;
+    const item: Partial<MenuItem> = req.body;
+    
+    // Build dynamic update query
+    const fields: string[] = [];
+    const values: any[] = [];
+    
+    if (item.name !== undefined) {
+      fields.push('name = ?');
+      values.push(item.name);
+    }
+    if (item.category !== undefined) {
+      fields.push('category = ?');
+      values.push(item.category);
+    }
+    if (item.base_price !== undefined) {
+      fields.push('base_price = ?');
+      values.push(item.base_price);
+    }
+    if (item.preparation_complexity !== undefined) {
+      fields.push('preparation_complexity = ?');
+      values.push(item.preparation_complexity);
+    }
+    
+    if (fields.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+    
+    values.push(itemId);
+    const query = `UPDATE menu_items SET ${fields.join(', ')} WHERE id = ?`;
+    
+    const [result] = await pool.execute(query, values);
+    res.json({ 
+      message: 'Menu item updated successfully', 
+      affectedRows: (result as any).affectedRows 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update menu item' });
+  }
+};
+
+export const deleteMenuItem = async (req: Request, res: Response) => {
+  try {
+    const { itemId } = req.params;
+    const [result] = await pool.execute(
+      'DELETE FROM menu_items WHERE id = ?',
+      [itemId]
+    );
+    res.json({ 
+      message: 'Menu item deleted successfully', 
+      affectedRows: (result as any).affectedRows 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete menu item' });
+  }
+};
