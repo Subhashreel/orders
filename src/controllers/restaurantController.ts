@@ -11,11 +11,11 @@ export const createRestaurant = async (req: Request, res: Response) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
         restaurant.name,
-        restaurant.location_type,
-        restaurant.base_weekday_discount,
-        restaurant.base_weekend_discount,
-        restaurant.base_preparation_time,
-        restaurant.peak_hour_threshold
+        restaurant.locationType,
+        restaurant.baseWeekdayDiscount,
+        restaurant.baseWeekendDiscount,
+        restaurant.basePreparationTime,
+        restaurant.peakHourThreshold
       ]
     );
     res.status(201).json({ 
@@ -67,25 +67,25 @@ export const updateRestaurant = async (req: Request, res: Response) => {
       fields.push('name = ?');
       values.push(updates.name);
     }
-    if (updates.location_type !== undefined) {
+    if (updates.locationType !== undefined) {
       fields.push('location_type = ?');
-      values.push(updates.location_type);
+      values.push(updates.locationType);
     }
-    if (updates.base_weekday_discount !== undefined) {
+    if (updates.baseWeekdayDiscount !== undefined) {
       fields.push('base_weekday_discount = ?');
-      values.push(updates.base_weekday_discount);
+      values.push(updates.baseWeekdayDiscount);
     }
-    if (updates.base_weekend_discount !== undefined) {
+    if (updates.baseWeekendDiscount !== undefined) {
       fields.push('base_weekend_discount = ?');
-      values.push(updates.base_weekend_discount);
+      values.push(updates.baseWeekendDiscount);
     }
-    if (updates.base_preparation_time !== undefined) {
+    if (updates.basePreparationTime !== undefined) {
       fields.push('base_preparation_time = ?');
-      values.push(updates.base_preparation_time);
+      values.push(updates.basePreparationTime);
     }
-    if (updates.peak_hour_threshold !== undefined) {
+    if (updates.peakHourThreshold !== undefined) {
       fields.push('peak_hour_threshold = ?');
-      values.push(updates.peak_hour_threshold);
+      values.push(updates.peakHourThreshold);
     }
     
     if (fields.length === 0) {

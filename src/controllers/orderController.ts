@@ -12,7 +12,7 @@ export const createOrder = async (req: Request, res: Response) => {
     
     const [restaurants]: any = await conn.execute(
       'SELECT * FROM restaurants WHERE id = ?',
-      [orderRequest.restaurant_id]
+      [orderRequest.restaurantId]
     );
     
     if (restaurants.length === 0) {
@@ -21,7 +21,7 @@ export const createOrder = async (req: Request, res: Response) => {
     
     const restaurant = restaurants[0];
     
-    const menuItemIds = orderRequest.items.map(i => i.menu_item_id);
+    const menuItemIds = orderRequest.items.map(i => i.menuItemId);
     const placeholders = menuItemIds.map(() => '?').join(',');
     const [menuItems]: any = await conn.execute(
       `SELECT * FROM menu_items WHERE id IN (${placeholders})`,
@@ -42,11 +42,11 @@ export const createOrder = async (req: Request, res: Response) => {
     // });
     const orderItems = orderRequest.items.map(item => {
         const menuItem = menuItems.find(
-          (m: any) => m.id === item.menu_item_id
+          (m: any) => m.id === item.menuItemId
         );
       
         if (!menuItem) {
-          throw new Error(`Menu item ${item.menu_item_id} not found`);
+          throw new Error(`Menu item ${item.menuItemId} not found`);
         }
       
         const totalPrice = menuItem.base_price * item.quantity;
@@ -54,9 +54,9 @@ export const createOrder = async (req: Request, res: Response) => {
       
         return {
           ...item,
-          unit_price: menuItem.base_price,
-          total_price: totalPrice,
-          preparation_complexity: menuItem.preparation_complexity
+          unitPrice: menuItem.base_price,
+          totalPrice: totalPrice,
+          preparationComplexity: menuItem.preparation_complexity
         };
       });
       
@@ -68,7 +68,7 @@ export const createOrder = async (req: Request, res: Response) => {
        WHERE restaurant_id = ? 
        AND DATE(created_at) = CURDATE() 
        AND HOUR(created_at) = ?`,
-      [orderRequest.restaurant_id, currentHour]
+      [orderRequest.restaurantId, currentHour]
     );
     
     const isPeakHour = hourlyOrders[0].count >= restaurant.peak_hour_threshold;
@@ -89,9 +89,9 @@ export const createOrder = async (req: Request, res: Response) => {
        estimated_preparation_time, order_date, order_time)
        VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, CURDATE(), CURTIME())`,
       [
-        orderRequest.restaurant_id,
-        orderRequest.customer_name,
-        orderRequest.customer_phone,
+        orderRequest.restaurantId,
+        orderRequest.customerName,
+        orderRequest.customerPhone,
         subtotal,
         discountPercentage,
         discountAmount,
@@ -106,7 +106,7 @@ export const createOrder = async (req: Request, res: Response) => {
       await conn.execute(
         `INSERT INTO order_items (order_id, menu_item_id, quantity, unit_price, total_price)
          VALUES (?, ?, ?, ?, ?)`,
-        [orderId, item.menu_item_id, item.quantity, item.unit_price, item.total_price]
+        [orderId, item.menuItemId, item.quantity, item.unitPrice, item.totalPrice]
       );
     }
     
@@ -119,13 +119,13 @@ export const createOrder = async (req: Request, res: Response) => {
     
     res.status(201).json({
       message: 'Order created successfully',
-      order_id: orderId,
+      orderId: orderId,
       subtotal,
-      discount_percentage: discountPercentage,
-      discount_amount: discountAmount,
-      total_amount: totalAmount,
-      estimated_preparation_time: estimatedPrepTime,
-      is_peak_hour: isPeakHour
+      discountPercentage: discountPercentage,
+      discountAmount: discountAmount,
+      totalAmount: totalAmount,
+      estimatedPreparationTime: estimatedPrepTime,
+      isPeakHour: isPeakHour
     });
   } catch (error) {
     await conn.rollback();
@@ -171,8 +171,8 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     
     res.json({ 
       message: 'Order status updated successfully', 
-      old_status: oldStatus, 
-      new_status: status 
+      oldStatus: oldStatus, 
+      newStatus: status 
     });
   } catch (error) {
     await conn.rollback();

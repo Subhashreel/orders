@@ -8,7 +8,7 @@ const LOCATION_MULTIPLIERS: Record<string, number> = {
   urban: 1.0
 };
 
-//function to calculate discount based on restaurant location (peak hour removed for fixed pricing)
+//function to calculate discount based on restaurant location and time
 
 export const calculateDiscount = (
   restaurant: Restaurant
@@ -18,10 +18,10 @@ export const calculateDiscount = (
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
   
   let discount = isWeekend 
-    ? restaurant.base_weekend_discount 
-    : restaurant.base_weekday_discount;
+    ? restaurant.baseWeekendDiscount 
+    : restaurant.baseWeekdayDiscount;
   
-  const locationMultiplier = LOCATION_MULTIPLIERS[restaurant.location_type] || 1.0;
+  const locationMultiplier = LOCATION_MULTIPLIERS[restaurant.locationType] || 1.0;
   discount *= locationMultiplier;
   
   return Math.min(discount, 50);
@@ -29,11 +29,11 @@ export const calculateDiscount = (
 
 export const calculatePreparationTime = (
   baseTime: number,
-  orderItems: Array<{ quantity: number; preparation_complexity: number }>,
+  orderItems: Array<{ quantity: number; preparationComplexity: number }>,
   isPeakHour: boolean
 ): number => {
   const totalComplexity = orderItems.reduce(
-    (sum, item) => sum + (item.quantity * item.preparation_complexity),
+    (sum, item) => sum + (item.quantity * item.preparationComplexity),
     0
   );
   

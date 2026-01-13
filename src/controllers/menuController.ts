@@ -9,11 +9,11 @@ export const createMenuItem = async (req: Request, res: Response) => {
       `INSERT INTO menu_items (restaurant_id, name, category, base_price, preparation_complexity)
        VALUES (?, ?, ?, ?, ?)`,
       [
-        item.restaurant_id, 
+        item.restaurantId, 
         item.name, 
         item.category, 
-        item.base_price, 
-        item.preparation_complexity
+        item.basePrice, 
+        item.preparationComplexity
       ]
     );
     res.status(201).json({ 
@@ -55,13 +55,13 @@ export const updateMenuItem = async (req: Request, res: Response) => {
       fields.push('category = ?');
       values.push(item.category);
     }
-    if (item.base_price !== undefined) {
+    if (item.basePrice !== undefined) {
       fields.push('base_price = ?');
-      values.push(item.base_price);
+      values.push(item.basePrice);
     }
-    if (item.preparation_complexity !== undefined) {
+    if (item.preparationComplexity !== undefined) {
       fields.push('preparation_complexity = ?');
-      values.push(item.preparation_complexity);
+      values.push(item.preparationComplexity);
     }
     
     if (fields.length === 0) {

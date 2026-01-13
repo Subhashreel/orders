@@ -23,25 +23,25 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - name
- *               - location_type
+ *               - locationType
  *             properties:
  *               name:
  *                 type: string
  *                 example: "Campus Cafe"
- *               location_type:
+ *               locationType:
  *                 type: string
  *                 enum: [college, workplace, airport, city, urban]
  *                 example: "college"
- *               base_weekday_discount:
+ *               baseWeekdayDiscount:
  *                 type: number
  *                 example: 5
- *               base_weekend_discount:
+ *               baseWeekendDiscount:
  *                 type: number
  *                 example: 15
- *               base_preparation_time:
+ *               basePreparationTime:
  *                 type: integer
  *                 example: 20
- *               peak_hour_threshold:
+ *               peakHourThreshold:
  *                 type: integer
  *                 example: 10
  *     responses:
@@ -101,15 +101,15 @@ router.get('/:id', getRestaurantById);
  *             properties:
  *               name:
  *                 type: string
- *               location_type:
+ *               locationType:
  *                 type: string
- *               base_weekday_discount:
+ *               baseWeekdayDiscount:
  *                 type: number
- *               base_weekend_discount:
+ *               baseWeekendDiscount:
  *                 type: number
- *               base_preparation_time:
+ *               basePreparationTime:
  *                 type: integer
- *               peak_hour_threshold:
+ *               peakHourThreshold:
  *                 type: integer
  *     responses:
  *       200:

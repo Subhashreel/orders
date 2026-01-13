@@ -21,13 +21,13 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               restaurant_id:
+ *               restaurantId:
  *                 type: integer
  *                 example: 1
- *               customer_name:
+ *               customerName:
  *                 type: string
  *                 example: "John Doe"
- *               customer_phone:
+ *               customerPhone:
  *                 type: string
  *                 example: "+1234567890"
  *               items:
@@ -35,7 +35,7 @@ const router = express.Router();
  *                 items:
  *                   type: object
  *                   properties:
- *                     menu_item_id:
+ *                     menuItemId:
  *                       type: integer
  *                       example: 1
  *                     quantity:

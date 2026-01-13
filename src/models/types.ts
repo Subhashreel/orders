@@ -5,47 +5,47 @@ export type MenuCategory = 'appetizer' | 'main' | 'dessert' | 'beverage';
 export interface Restaurant {
   id?: number;
   name: string;
-  location_type: LocationType;
-  base_weekday_discount: number;
-  base_weekend_discount: number;
-  base_preparation_time: number;
-  peak_hour_threshold: number;
+  locationType: LocationType;
+  baseWeekdayDiscount: number;
+  baseWeekendDiscount: number;
+  basePreparationTime: number;
+  peakHourThreshold: number;
 }
 
 export interface MenuItem {
   id?: number;
-  restaurant_id: number;
+  restaurantId: number;
   name: string;
   category: MenuCategory;
-  base_price: number;
-  preparation_complexity: number;
+  basePrice: number;
+  preparationComplexity: number;
 }
 
 export interface Order {
   id?: number;
-  restaurant_id: number;
-  customer_name: string;
-  customer_phone: string;
-  order_status: OrderStatus;
+  restaurantId: number;
+  customerName: string;
+  customerPhone: string;
+  orderStatus: OrderStatus;
   subtotal: number;
-  discount_percentage: number;
-  discount_amount: number;
-  total_amount: number;
-  estimated_preparation_time: number;
-  order_date: string;
-  order_time: string;
+  discountPercentage: number;
+  discountAmount: number;
+  totalAmount: number;
+  estimatedPreparationTime: number;
+  orderDate: string;
+  orderTime: string;
 }
 
 export interface OrderItem {
-  menu_item_id: number;
+  menuItemId: number;
   quantity: number;
-  unit_price?: number;
-  total_price?: number;
+  unitPrice?: number;
+  totalPrice?: number;
 }
 
 export interface CreateOrderRequest {
-  restaurant_id: number;
-  customer_name: string;
-  customer_phone: string;
+  restaurantId: number;
+  customerName: string;
+  customerPhone: string;
   items: OrderItem[];
 }

@@ -16,7 +16,7 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               restaurant_id:
+ *               restaurantId:
  *                 type: integer
  *                 example: 1
  *               name:
@@ -26,10 +26,10 @@ const router = express.Router();
  *                 type: string
  *                 enum: [appetizer, main, dessert, beverage]
  *                 example: "main"
- *               base_price:
+ *               basePrice:
  *                 type: number
  *                 example: 12.99
- *               preparation_complexity:
+ *               preparationComplexity:
  *                 type: number
  *                 example: 1.5
  *     responses:
@@ -79,9 +79,9 @@ router.get('/restaurant/:restaurantId', getMenuByRestaurant);
  *                 type: string
  *               category:
  *                 type: string
- *               base_price:
+ *               basePrice:
  *                 type: number
- *               preparation_complexity:
+ *               preparationComplexity:
  *                 type: number
  *     responses:
  *       200:
