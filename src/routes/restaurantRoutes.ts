@@ -1,9 +1,8 @@
 import express from 'express';
-import { 
-  createRestaurant, 
-  getAllRestaurants, 
+import {
+  upsertRestaurant,
+  getAllRestaurants,
   getRestaurantById,
-  updateRestaurant,
   deleteRestaurant
 } from '../controllers/restaurantController';
 
@@ -13,8 +12,11 @@ const router = express.Router();
  * @swagger
  * /api/restaurants:
  *   post:
- *     summary: Create a new restaurant
+ *     summary: Create or update a restaurant (UPSERT)
  *     tags: [Restaurants]
+ *     description: >
+ *       If id is provided and exists, the restaurant is updated.
+ *       If id is not provided, a new restaurant is created.
  *     requestBody:
  *       required: true
  *       content:
@@ -47,8 +49,10 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Restaurant created successfully
+ *       200:
+ *         description: Restaurant updated successfully
  */
-router.post('/', createRestaurant);
+router.post('/', upsertRestaurant);
 
 /**
  * @swagger
@@ -77,45 +81,10 @@ router.get('/', getAllRestaurants);
  *     responses:
  *       200:
  *         description: Restaurant details
+ *       404:
+ *         description: Restaurant not found
  */
 router.get('/:id', getRestaurantById);
-
-/**
- * @swagger
- * /api/restaurants/{id}:
- *   put:
- *     summary: Update a restaurant
- *     tags: [Restaurants]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               locationType:
- *                 type: string
- *               baseWeekdayDiscount:
- *                 type: number
- *               baseWeekendDiscount:
- *                 type: number
- *               basePreparationTime:
- *                 type: integer
- *               peakHourThreshold:
- *                 type: integer
- *     responses:
- *       200:
- *         description: Restaurant updated
- */
-router.put('/:id', updateRestaurant);
 
 /**
  * @swagger
@@ -131,7 +100,9 @@ router.put('/:id', updateRestaurant);
  *           type: integer
  *     responses:
  *       200:
- *         description: Restaurant deleted
+ *         description: Restaurant deleted successfully
+ *       404:
+ *         description: Restaurant not found
  */
 router.delete('/:id', deleteRestaurant);
 

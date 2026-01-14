@@ -1,21 +1,37 @@
 import { pool } from '../config/database';
 import { MenuItem } from '../models/types';
 
-export const createMenuItemDB = async (item: MenuItem) => {
-  const [result] = await pool.execute(
-    `INSERT INTO menu_items (restaurant_id, name, category, base_price, preparation_complexity)
-     VALUES (?, ?, ?, ?, ?)`,
-    [
-      item.restaurantId,
-      item.name,
-      item.category,
-      item.basePrice,
-      item.preparationComplexity
-    ]
-  );
+/**
+ * UPSERT Menu Item
+ * - Insert if new
+ * - Update if (restaurant_id + name) already exists
+ */
+export const upsertMenuItemDB = async (item: MenuItem) => {
+  const query = `
+    INSERT INTO menu_items
+      (restaurant_id, name, category, base_price, preparation_complexity)
+    VALUES (?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      category = VALUES(category),
+      base_price = VALUES(base_price),
+      preparation_complexity = VALUES(preparation_complexity)
+  `;
+
+  const values = [
+    item.restaurantId,
+    item.name,
+    item.category,
+    item.basePrice,
+    item.preparationComplexity
+  ];
+
+  const [result] = await pool.execute(query, values);
   return result;
 };
 
+/**
+ * Get full menu for a restaurant
+ */
 export const getMenuByRestaurantDB = async (restaurantId: number) => {
   const [rows] = await pool.execute(
     'SELECT * FROM menu_items WHERE restaurant_id = ?',
@@ -24,43 +40,23 @@ export const getMenuByRestaurantDB = async (restaurantId: number) => {
   return rows;
 };
 
-export const updateMenuItemDB = async (itemId: number, item: Partial<MenuItem>) => {
-  const fields: string[] = [];
-  const values: any[] = [];
-
-  if (item.name !== undefined) {
-    fields.push('name = ?');
-    values.push(item.name);
-  }
-  if (item.category !== undefined) {
-    fields.push('category = ?');
-    values.push(item.category);
-  }
-  if (item.basePrice !== undefined) {
-    fields.push('base_price = ?');
-    values.push(item.basePrice);
-  }
-  if (item.preparationComplexity !== undefined) {
-    fields.push('preparation_complexity = ?');
-    values.push(item.preparationComplexity);
-  }
-
-  if (fields.length === 0) {
-    return null;
-  }
-
-  values.push(itemId);
-  const query = `UPDATE menu_items SET ${fields.join(', ')} WHERE id = ?`;
-  const [result] = await pool.execute(query, values);
-  return result;
-};
-
+/**
+ * Delete menu item by ID
+ */
 export const deleteMenuItemDB = async (itemId: number) => {
-  const [result] = await pool.execute('DELETE FROM menu_items WHERE id = ?', [itemId]);
+  const [result] = await pool.execute(
+    'DELETE FROM menu_items WHERE id = ?',
+    [itemId]
+  );
   return result;
 };
 
+/**
+ * Fetch multiple menu items by IDs (used during order creation)
+ */
 export const getMenuItemsByIdsDB = async (itemIds: number[]) => {
+  if (itemIds.length === 0) return [];
+
   const placeholders = itemIds.map(() => '?').join(',');
   const [rows] = await pool.execute(
     `SELECT * FROM menu_items WHERE id IN (${placeholders})`,

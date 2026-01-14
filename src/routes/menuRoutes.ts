@@ -1,5 +1,9 @@
 import express from 'express';
-import { createMenuItem, getMenuByRestaurant, updateMenuItem, deleteMenuItem } from '../controllers/menuController';
+import {
+  upsertMenuItem,
+  getMenuByRestaurant,
+  deleteMenuItem
+} from '../controllers/menuController';
 
 const router = express.Router();
 
@@ -7,14 +11,23 @@ const router = express.Router();
  * @swagger
  * /api/menu:
  *   post:
- *     summary: Create a menu item
+ *     summary: Create or update a menu item (UPSERT)
  *     tags: [Menu]
+ *     description: >
+ *       Inserts a new menu item if it does not exist, or updates it if the same
+ *       restaurant already has an item with the same name.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - restaurantId
+ *               - name
+ *               - category
+ *               - basePrice
+ *               - preparationComplexity
  *             properties:
  *               restaurantId:
  *                 type: integer
@@ -31,12 +44,14 @@ const router = express.Router();
  *                 example: 12.99
  *               preparationComplexity:
  *                 type: number
- *                 example: 1.5
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Menu item created
+ *       200:
+ *         description: Menu item updated
  */
-router.post('/', createMenuItem);
+router.post('/', upsertMenuItem);
 
 /**
  * @swagger
@@ -59,39 +74,6 @@ router.get('/restaurant/:restaurantId', getMenuByRestaurant);
 /**
  * @swagger
  * /api/menu/{itemId}:
- *   put:
- *     summary: Update a menu item
- *     tags: [Menu]
- *     parameters:
- *       - in: path
- *         name: itemId
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               category:
- *                 type: string
- *               basePrice:
- *                 type: number
- *               preparationComplexity:
- *                 type: number
- *     responses:
- *       200:
- *         description: Menu item updated
- */
-router.put('/:itemId', updateMenuItem);
-
-/**
- * @swagger
- * /api/menu/{itemId}:
  *   delete:
  *     summary: Delete a menu item
  *     tags: [Menu]
@@ -104,6 +86,8 @@ router.put('/:itemId', updateMenuItem);
  *     responses:
  *       200:
  *         description: Menu item deleted
+ *       404:
+ *         description: Menu item not found
  */
 router.delete('/:itemId', deleteMenuItem);
 
