@@ -13,6 +13,10 @@ const LOCATION_MULTIPLIERS: Record<string, number> = {
 export const calculateDiscount = (
   restaurant: Restaurant
 ): number => {
+  if (!restaurant.baseWeekdayDiscount || !restaurant.baseWeekendDiscount) {
+    return 0;
+  }
+
   const today = new Date();
   const dayOfWeek = today.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
