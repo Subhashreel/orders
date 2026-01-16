@@ -1,6 +1,12 @@
-export type LocationType = 'college' | 'workplace' | 'airport' | 'city' | 'urban';
-export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
-export type MenuCategory = 'appetizer' | 'main' | 'dessert' | 'beverage';
+import {
+  LOCATION_TYPES,
+  ORDER_STATUSES,
+  MENU_CATEGORIES
+} from '../constants/appConstants';
+
+export type LocationType = (typeof LOCATION_TYPES)[number];
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export type MenuCategory = (typeof MENU_CATEGORIES)[number];
 
 export interface Restaurant {
   id?: number;

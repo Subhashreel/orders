@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import routes from './routes'; // Import the central index.ts file from the routes folder
+import { globalErrorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
 
@@ -25,5 +26,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Use all routes from the central index.ts file
 app.use('/api', routes);
+app.use(globalErrorHandler);
 
 app.listen(5000, () => console.log('Server running on port 5000'));

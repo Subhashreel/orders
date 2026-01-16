@@ -1,10 +1,8 @@
 import express from 'express';
-import {
-  createOrder,
-  updateOrderStatus,
-  getOrderById,
-  getOrdersByRestaurant
-} from '../controllers/orderController';
+import {createOrder,updateOrderStatus,getOrderById,getOrdersByRestaurant} from '../controllers/orderController';
+
+import {validateBody, validateParams, validateQuery } from '../middlewares/validate';
+import {createOrderSchema,updateOrderStatusSchema,orderIdParamSchema,restaurantIdParamSchema,ordersQuerySchema} from '../validators/orderSchema';
 
 const router = express.Router();
 
@@ -45,7 +43,7 @@ const router = express.Router();
  *       201:
  *         description: Order created with calculated discount
  */
-router.post('/', createOrder);
+router.post('/',validateBody(createOrderSchema),createOrder);
 
 /**
  * @swagger
@@ -73,7 +71,7 @@ router.post('/', createOrder);
  *       200:
  *         description: Status updated
  */
-router.put('/:orderId/status', updateOrderStatus);
+router.put('/:orderId/status',validateParams(orderIdParamSchema),validateBody(updateOrderStatusSchema),updateOrderStatus);
 
 /**
  * @swagger
@@ -91,7 +89,7 @@ router.put('/:orderId/status', updateOrderStatus);
  *       200:
  *         description: Order details
  */
-router.get('/:orderId', getOrderById);
+router.get('/:orderId',validateParams(orderIdParamSchema),getOrderById);
 
 /**
  * @swagger
@@ -118,6 +116,6 @@ router.get('/:orderId', getOrderById);
  *       200:
  *         description: Orders list
  */
-router.get('/restaurant/:restaurantId', getOrdersByRestaurant);
+router.get('/restaurant/:restaurantId',validateParams(restaurantIdParamSchema),validateQuery(ordersQuerySchema),getOrdersByRestaurant);
 
 export default router;

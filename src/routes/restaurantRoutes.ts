@@ -1,10 +1,7 @@
 import express from 'express';
-import {
-  upsertRestaurant,
-  getAllRestaurants,
-  getRestaurantById,
-  deleteRestaurant
-} from '../controllers/restaurantController';
+import {upsertRestaurant,getAllRestaurants,getRestaurantById,deleteRestaurant} from '../controllers/restaurantController';
+import { validateBody, validateParams } from '../middlewares/validate';
+import {upsertRestaurantSchema,restaurantIdParamSchema} from '../validators/restaurantSchema';
 
 const router = express.Router();
 
@@ -26,7 +23,14 @@ const router = express.Router();
  *             required:
  *               - name
  *               - locationType
+ *               - baseWeekdayDiscount
+ *               - baseWeekendDiscount
+ *               - basePreparationTime
+ *               - peakHourThreshold
  *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
  *               name:
  *                 type: string
  *                 example: "Campus Cafe"
@@ -52,7 +56,7 @@ const router = express.Router();
  *       200:
  *         description: Restaurant updated successfully
  */
-router.post('/', upsertRestaurant);
+router.post('/',validateBody(upsertRestaurantSchema),upsertRestaurant);
 
 /**
  * @swagger
@@ -84,7 +88,7 @@ router.get('/', getAllRestaurants);
  *       404:
  *         description: Restaurant not found
  */
-router.get('/:id', getRestaurantById);
+router.get('/:id',validateParams(restaurantIdParamSchema),getRestaurantById);
 
 /**
  * @swagger
@@ -104,6 +108,6 @@ router.get('/:id', getRestaurantById);
  *       404:
  *         description: Restaurant not found
  */
-router.delete('/:id', deleteRestaurant);
+router.delete('/:id',validateParams(restaurantIdParamSchema),deleteRestaurant);
 
 export default router;

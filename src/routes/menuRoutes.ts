@@ -1,9 +1,7 @@
 import express from 'express';
-import {
-  upsertMenuItem,
-  getMenuByRestaurant,
-  deleteMenuItem
-} from '../controllers/menuController';
+import {upsertMenuItem,getMenuByRestaurant,deleteMenuItem} from '../controllers/menuController';
+import {validateBody, validateParams } from '../middlewares/validate';
+import {upsertMenuSchema,restaurantIdParamSchema,itemIdParamSchema} from '../validators/menuSchema';
 
 const router = express.Router();
 
@@ -51,7 +49,7 @@ const router = express.Router();
  *       200:
  *         description: Menu item updated
  */
-router.post('/', upsertMenuItem);
+router.post('/', validateBody(upsertMenuSchema), upsertMenuItem);
 
 /**
  * @swagger
@@ -69,7 +67,7 @@ router.post('/', upsertMenuItem);
  *       200:
  *         description: Menu items list
  */
-router.get('/restaurant/:restaurantId', getMenuByRestaurant);
+router.get('/restaurant/:restaurantId',validateParams(restaurantIdParamSchema),getMenuByRestaurant);
 
 /**
  * @swagger
@@ -89,6 +87,6 @@ router.get('/restaurant/:restaurantId', getMenuByRestaurant);
  *       404:
  *         description: Menu item not found
  */
-router.delete('/:itemId', deleteMenuItem);
+router.delete('/:itemId',validateParams(itemIdParamSchema),deleteMenuItem);
 
 export default router;

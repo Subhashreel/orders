@@ -1,54 +1,66 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { MenuItem } from '../models/types';
 import {
   upsertMenuItemDB,
   getMenuByRestaurantDB,
   deleteMenuItemDB
 } from '../services/menuService';
+import { NotFoundError } from '../utils/appError';
+import { sendSuccess } from '../utils/apiResponse';
 
-export const upsertMenuItem = async (req: Request, res: Response) => {
+export const upsertMenuItem = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const item: MenuItem = req.body;
-
     const result: any = await upsertMenuItemDB(item);
 
     const isInserted = result.affectedRows === 1 && result.insertId > 0;
-    const isUpdated = result.affectedRows === 2;
 
-    res.status(isInserted ? 201 : 200).json({
-      message: isInserted
+    return sendSuccess(
+      res,
+      isInserted
         ? 'Menu item created successfully'
-        : 'Menu item updated successfully'
-    });
+        : 'Menu item updated successfully',
+      null,
+      isInserted ? 201 : 200
+    );
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to upsert menu item' });
+    next(error); // 👉 goes to global error handler
   }
 };
 
-export const getMenuByRestaurant = async (req: Request, res: Response) => {
+export const getMenuByRestaurant = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const restaurantId = Number(req.params.restaurantId);
     const rows = await getMenuByRestaurantDB(restaurantId);
-    res.json(rows);
+    return sendSuccess(res, 'Menu items fetched successfully', rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch menu items' });
+    next(error);
   }
 };
 
-export const deleteMenuItem = async (req: Request, res: Response) => {
+export const deleteMenuItem = async ( 
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const itemId = Number(req.params.itemId);
     const result: any = await deleteMenuItemDB(itemId);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Menu item not found' });
+      throw new NotFoundError('Menu item not found');
     }
 
-    res.json({ message: 'Menu item deleted successfully' });
+    return sendSuccess(res, 'Menu item deleted successfully');
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to delete menu item' });
+    next(error);
   }
 };

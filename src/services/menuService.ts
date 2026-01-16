@@ -1,7 +1,7 @@
 import { pool } from '../config/database';
 import { MenuItem } from '../models/types';
 
-/**
+/*
  * UPSERT Menu Item
  * - Insert if new
  * - Update if (restaurant_id + name) already exists
@@ -29,9 +29,7 @@ export const upsertMenuItemDB = async (item: MenuItem) => {
   return result;
 };
 
-/**
- * Get full menu for a restaurant
- */
+//Get full menu for a restaurant
 export const getMenuByRestaurantDB = async (restaurantId: number) => {
   const [rows] = await pool.execute(
     'SELECT * FROM menu_items WHERE restaurant_id = ?',
@@ -40,9 +38,7 @@ export const getMenuByRestaurantDB = async (restaurantId: number) => {
   return rows;
 };
 
-/**
- * Delete menu item by ID
- */
+//Delete menu item by ID
 export const deleteMenuItemDB = async (itemId: number) => {
   const [result] = await pool.execute(
     'DELETE FROM menu_items WHERE id = ?',
@@ -51,9 +47,7 @@ export const deleteMenuItemDB = async (itemId: number) => {
   return result;
 };
 
-/**
- * Fetch multiple menu items by IDs (used during order creation)
- */
+//Fetch multiple menu items by IDs (used during order creation)
 export const getMenuItemsByIdsDB = async (itemIds: number[]) => {
   if (itemIds.length === 0) return [];
 

@@ -2,19 +2,21 @@ import { CreateOrderRequest } from '../models/types';
 import { calculateDiscount, calculatePreparationTime } from './orderUtils';
 import { getRestaurantForOrderDB, getHourlyOrderCountDB } from '../services/orderService';
 import { getMenuItemsByIdsDB } from '../services/menuService';
+import { NotFoundError } from '../utils/appError';
 
 export const processOrderCalculations = async (orderRequest: CreateOrderRequest) => {
   const restaurant = await getRestaurantForOrderDB(orderRequest.restaurantId);
   if (!restaurant) {
-    throw new Error('Restaurant not found');
-  }
+  throw new NotFoundError('Restaurant not found');
+}
+
 
   const menuItems: any = await getMenuItemsByIdsDB(orderRequest.items.map(i => i.menuItemId));
 
   let subtotal = 0;
   const orderItems = orderRequest.items.map(item => {
     const menuItem = menuItems.find((m: any) => m.id === item.menuItemId);
-    if (!menuItem) throw new Error(`Menu item ${item.menuItemId} not found`);
+    if (!menuItem) throw new NotFoundError(`Menu item ${item.menuItemId} not found`);
 
     const totalPrice = menuItem.base_price * item.quantity;
     subtotal += totalPrice;
