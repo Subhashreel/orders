@@ -2,6 +2,8 @@ import { pool } from '../config/database';
 import { OrderStatus } from '../models/types';
 import { withTransaction } from '../utils/dbTransaction';
 
+//create order
+
 export const createOrderDB = async (
   restaurantId: number,
   customerName: string,
@@ -14,10 +16,12 @@ export const createOrderDB = async (
 ) => {
   return withTransaction(async (conn) => {
     const [orderResult]: any = await conn.execute(
-      `INSERT INTO orders (restaurant_id, customer_name, customer_phone, order_status,
-       subtotal, discount_percentage, discount_amount, total_amount, 
-       estimated_preparation_time, order_date, order_time)
-       VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, CURDATE(), CURTIME())`,
+      `INSERT INTO orders (
+        restaurant_id, customer_name, customer_phone, order_status,
+        subtotal, discount_percentage, discount_amount, total_amount,
+        estimated_preparation_time
+      )
+      VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?)`,
       [
         restaurantId,
         customerName,
@@ -30,70 +34,68 @@ export const createOrderDB = async (
       ]
     );
 
-    await conn.execute(
-      'INSERT INTO order_status_history (order_id, new_status) VALUES (?, "pending")',
-      [orderResult.insertId]
-    );
-
     return orderResult.insertId;
   });
 };
+
+//add order items to an order
 
 export const addOrderItemsDB = async (orderId: number, items: any[]) => {
   return withTransaction(async (conn) => {
     for (const item of items) {
       await conn.execute(
-        `INSERT INTO order_items (order_id, menu_item_id, quantity, unit_price, total_price)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO order_items (
+          order_id, menu_item_id, quantity, unit_price, total_price
+        )
+        VALUES (?, ?, ?, ?, ?)`,
         [orderId, item.menuItemId, item.quantity, item.unitPrice, item.totalPrice]
       );
     }
   });
 };
 
+//update order status
+
 export const updateOrderStatusDB = async (orderId: number, newStatus: OrderStatus) => {
   return withTransaction(async (conn) => {
     const [orders]: any = await conn.execute(
-      'SELECT order_status FROM orders WHERE id = ?',
+      'SELECT id FROM orders WHERE id = ?',
       [orderId]
     );
 
     if (orders.length === 0) return null;
 
-    const oldStatus = orders[0].order_status;
-
-    await conn.execute('UPDATE orders SET order_status = ? WHERE id = ?', [
-      newStatus,
-      orderId
-    ]);
-
     await conn.execute(
-      'INSERT INTO order_status_history (order_id, old_status, new_status) VALUES (?, ?, ?)',
-      [orderId, oldStatus, newStatus]
+      'UPDATE orders SET order_status = ? WHERE id = ?',
+      [newStatus, orderId]
     );
 
-    return { oldStatus, newStatus };
+    return { newStatus };
   });
 };
 
+//get order by ID with items
+
 export const getOrderByIdDB = async (orderId: number) => {
-  const [orders]: any = await pool.execute('SELECT * FROM orders WHERE id = ?', [orderId]);
+  const [orders]: any = await pool.execute(
+    'SELECT * FROM orders WHERE id = ?',
+    [orderId]
+  );
+
   if (orders.length === 0) return null;
 
   const [items] = await pool.execute(
-    `SELECT oi.*, mi.name as item_name FROM order_items oi
+    `SELECT oi.*, mi.name AS item_name
+     FROM order_items oi
      JOIN menu_items mi ON oi.menu_item_id = mi.id
      WHERE oi.order_id = ?`,
     [orderId]
   );
 
-  const [history] = await pool.execute(
-    'SELECT * FROM order_status_history WHERE order_id = ? ORDER BY changed_at',
-    [orderId]
-  );
-
-  return { order: orders[0], items, statusHistory: history };
+  return { order: orders[0], items };
 };
+
+//get orders by restaurant with optional filters
 
 export const getOrdersByRestaurantDB = async (
   restaurantId: number,
@@ -109,7 +111,7 @@ export const getOrdersByRestaurantDB = async (
   }
 
   if (date) {
-    query += ' AND order_date = ?';
+    query += ' AND DATE(created_at) = ?';
     params.push(date);
   }
 
@@ -118,6 +120,8 @@ export const getOrdersByRestaurantDB = async (
   const [orders] = await pool.execute(query, params);
   return orders;
 };
+
+//get restaurant details for order calculations
 
 export const getRestaurantForOrderDB = async (restaurantId: number) => {
   const [restaurants]: any = await pool.execute(
@@ -139,14 +143,18 @@ export const getRestaurantForOrderDB = async (restaurantId: number) => {
   };
 };
 
+//hourly order count for peak hour calculation
+
 export const getHourlyOrderCountDB = async (restaurantId: number, currentHour: number) => {
   const [hourlyOrders]: any = await pool.execute(
-    `SELECT COUNT(*) as count FROM orders 
-     WHERE restaurant_id = ? 
-     AND DATE(created_at) = CURDATE() 
+    `SELECT COUNT(*) AS count
+     FROM orders
+     WHERE restaurant_id = ?
+     AND DATE(created_at) = CURDATE()
      AND HOUR(created_at) = ?`,
     [restaurantId, currentHour]
   );
 
   return hourlyOrders[0].count;
 };
+
