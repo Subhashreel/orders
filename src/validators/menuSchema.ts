@@ -26,9 +26,10 @@ export const upsertMenuSchema = z
     basePrice: z.number().positive('basePrice must be greater than 0'),
 
     preparationComplexity: z
-      .number()
-      .int('preparationComplexity must be an integer')
-      .positive('preparationComplexity must be greater than 0')
+    .number()
+    .positive('preparationComplexity must be greater than 0')
+    .max(9.99, 'preparationComplexity must be less than or equal to 9.99')
+
   })
   .strict();
   

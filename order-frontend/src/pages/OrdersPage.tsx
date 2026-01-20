@@ -54,41 +54,44 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
   }, [restaurantId, statusFilter]);
 
   const loadOrders = async () => {
-    try {
-      const data = await api.orders.getByRestaurant(
-        restaurantId,
-        statusFilter || undefined
-      );
-      setOrders(data);
-    } catch (err: any) {
-      notify('error', err?.response?.data?.message || 'Failed to fetch orders');
-    }
-  };
+  try {
+    const ordersData = await api.orders.getByRestaurant(
+      restaurantId,
+      statusFilter || undefined
+    );
+
+    setOrders(ordersData);
+
+    // 🔥 AUTO LOAD ITEMS FOR EACH ORDER
+    const itemsMap: Record<number, any[]> = {};
+
+    await Promise.all(
+      ordersData.map(async (order) => {
+        try {
+          const res = await api.orders.getById(order.id);
+          itemsMap[order.id] = res.items;
+        } catch {
+          itemsMap[order.id] = [];
+        }
+      })
+    );
+
+    setItemsByOrder(itemsMap);
+
+  } catch (err: any) {
+    notify('error', err?.response?.data?.message || 'Failed to fetch orders');
+  }
+};
+
 
   /* -------- View Order Details + Load Items -------- */
 
-  const viewDetails = async (order: Order) => {
-    try {
-      let items = itemsByOrder[order.id];
+  const viewDetails = (order: Order) => {
+  setSelectedOrder(order);
+  setOrderItems(itemsByOrder[order.id] || []);
+  setDetailsOpen(true);
+};
 
-      if (!items) {
-        const res = await api.orders.getById(order.id);
-        items = res.items;
-
-        setItemsByOrder(prev => ({
-          ...prev,
-          [order.id]: items,
-        }));
-      }
-
-      setSelectedOrder(order);
-      setOrderItems(items);
-      setDetailsOpen(true);
-
-    } catch (err: any) {
-      notify('error', err?.response?.data?.message || 'Failed to load order details');
-    }
-  };
 
   /* -------- Create Order -------- */
 
