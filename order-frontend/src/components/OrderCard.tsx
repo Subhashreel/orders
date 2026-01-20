@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Order, OrderStatus } from '../types';
 
 interface OrderCardProps {
   order: Order;
-  items?: any[]; // 👈 NEW
+  items?: any[];
   onStatusUpdate: (status: OrderStatus) => void;
 }
 
@@ -12,6 +12,28 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   items = [],
   onStatusUpdate,
 }) => {
+
+  /* -------- Countdown Timer -------- */
+
+  const calcRemaining = () => {
+    const created = new Date(order.createdAt).getTime();
+    const now = Date.now();
+    const diffMin = Math.floor((now - created) / 60000); // minutes passed
+    return Math.max(order.estimatedPrepTime - diffMin, 0);
+  };
+
+  const [remainingTime, setRemainingTime] = useState<number>(calcRemaining());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRemainingTime(calcRemaining());
+    }, 60000); // update every minute
+
+    return () => clearInterval(interval);
+  }, [order.createdAt, order.estimatedPrepTime]);
+
+  /* -------- UI -------- */
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
 
@@ -38,15 +60,21 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           <div className="text-sm text-slate-500">
             Discount: ₹{order.discountAmount}
           </div>
-          <div className="text-sm text-slate-500">
-            ⏱ {order.estimatedPrepTime} min
+
+          {/* ⏳ LIVE TIMER */}
+          <div
+            className={`text-sm font-semibold ${
+              remainingTime <= 2 ? 'text-red-600' : 'text-slate-600'
+            }`}
+          >
+            ⏱ {remainingTime} min left
           </div>
         </div>
       </div>
 
       <hr className="my-4" />
 
-      {/* Items Section */}
+      {/* Items */}
       <div className="mb-3">
         <div className="font-medium text-slate-700 mb-1">Items:</div>
 
@@ -61,7 +89,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           </div>
         ) : (
           <div className="text-sm text-slate-400">
-            Click "View Details" to load items
+            Loading items...
           </div>
         )}
       </div>

@@ -53,20 +53,55 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
     loadOrders();
   }, [restaurantId, statusFilter]);
 
-  const loadOrders = async () => {
+//   const loadOrders = async () => {
+//   try {
+//     const ordersData = await api.orders.getByRestaurant(
+//       restaurantId,
+//       statusFilter || undefined
+//     );
+
+//     setOrders(ordersData);
+
+//     // 🔥 AUTO LOAD ITEMS FOR EACH ORDER
+//     const itemsMap: Record<number, any[]> = {};
+
+//     await Promise.all(
+//       ordersData.map(async (order) => {
+//         try {
+//           const res = await api.orders.getById(order.id);
+//           itemsMap[order.id] = res.items;
+//         } catch {
+//           itemsMap[order.id] = [];
+//         }
+//       })
+//     );
+
+//     setItemsByOrder(itemsMap);
+
+//   } catch (err: any) {
+//     notify('error', err?.response?.data?.message || 'Failed to fetch orders');
+//   }
+// };
+
+const loadOrders = async () => {
   try {
     const ordersData = await api.orders.getByRestaurant(
       restaurantId,
       statusFilter || undefined
     );
 
-    setOrders(ordersData);
+    // ✅ REMOVE DELIVERED ORDERS
+    const activeOrders = ordersData.filter(
+      (order) => order.status !== 'delivered'
+    );
 
-    // 🔥 AUTO LOAD ITEMS FOR EACH ORDER
+    setOrders(activeOrders);
+
+    // 🔥 AUTO LOAD ITEMS FOR EACH ACTIVE ORDER
     const itemsMap: Record<number, any[]> = {};
 
     await Promise.all(
-      ordersData.map(async (order) => {
+      activeOrders.map(async (order) => {
         try {
           const res = await api.orders.getById(order.id);
           itemsMap[order.id] = res.items;
@@ -123,22 +158,60 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
 
   /* -------- Update Status -------- */
 
+  // const handleStatusUpdate = async (orderId: number, status: OrderStatus) => {
+  //   try {
+  //     await api.orders.updateStatus(orderId, status);
+  //     notify('success', 'Order status updated');
+  //     loadOrders();
+  //   } catch (err: any) {
+  //     notify('error', err?.response?.data?.message || 'Failed to update status');
+  //   }
+  // };
   const handleStatusUpdate = async (orderId: number, status: OrderStatus) => {
-    try {
-      await api.orders.updateStatus(orderId, status);
-      notify('success', 'Order status updated');
+  try {
+    await api.orders.updateStatus(orderId, status);
+    notify('success', 'Order status updated');
+
+    if (status === 'delivered') {
+      // ✅ remove from UI immediately
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+
+      // also cleanup cached items
+      setItemsByOrder(prev => {
+        const copy = { ...prev };
+        delete copy[orderId];
+        return copy;
+      });
+    } else {
+      // for other statuses, just refresh
       loadOrders();
-    } catch (err: any) {
-      notify('error', err?.response?.data?.message || 'Failed to update status');
     }
-  };
+
+  } catch (err: any) {
+    notify('error', err?.response?.data?.message || 'Failed to update status');
+  }
+};
+
 
   /* -------- Filters -------- */
 
-  const filteredOrders = orders.filter(o =>
+  const filteredOrders = orders
+  .filter(o =>
     o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.customerPhone.includes(searchTerm)
-  );
+  )
+  .sort((a, b) => {
+    const remA =
+      a.estimatedPrepTime -
+      Math.floor((Date.now() - new Date(a.createdAt).getTime()) / 60000);
+
+    const remB =
+      b.estimatedPrepTime -
+      Math.floor((Date.now() - new Date(b.createdAt).getTime()) / 60000);
+
+    return remA - remB; // smallest time first (urgent)
+  });
+
 
   /* -------- UI -------- */
 
