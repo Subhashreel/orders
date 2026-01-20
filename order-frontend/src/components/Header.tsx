@@ -18,9 +18,9 @@ export const Header: React.FC<HeaderProps> = ({ selectedRestaurant }) => (
           </div>
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-              Order Management
+              Restaurant Order Manager
             </h1>
-            <p className="text-sm text-slate-500">Restaurant & Menu System</p>
+            <p className="text-sm text-slate-500">Manage your orders with ease!</p>
           </div>
         </div>
         {selectedRestaurant && (
